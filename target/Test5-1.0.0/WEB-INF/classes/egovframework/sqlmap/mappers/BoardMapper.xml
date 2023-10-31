@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="egovframework.example.board.service.BoardMapper">
+
+	<!-- /////////////////////////////// 게시글 ///////////////////////////////////// -->
+	<!-- 게시글 목록 -->
+    <select id="selectTest" parameterType="egovframework.example.board.vo.Pagination" resultType="egovframework.example.board.vo.BoardVo">
+        SELECT *
+			FROM(
+			    SELECT ROWNUM as RNUM, t.*
+			    FROM
+			    (
+			        SELECT *
+			        FROM BOARD
+			        <where>
+			            <if test="searchType=='title' and keyword != null and keyword !=''">
+			                AND title like CONCAT('%',#{keyword},'%')
+			            </if>
+			            <if test="searchType=='content' and keyword != null and keyword !=''">
+			                AND content like CONCAT('%',#{keyword},'%')
+			            </if>
+			            <if test="searchType=='memId' and keyword != null and keyword !=''">
+			                AND memId like CNCAT('%',#{keyword},'%')
+			            </if>
+			        </where>
+					ORDER BY boardNo DESC
+			    ) t
+			    WHERE ROWNUM <![CDATA[<=]]> #{startList}+#{listSize}
+			)
+		WHERE RNUM <![CDATA[>=]]> #{startList}
+		
+    </select>
+    
+    <!-- 게시글 갯수 -->
+    <select id="getBoardListCnt" parameterType="egovframework.example.board.vo.Pagination" resultType="Integer">
+        SELECT count(*) as listCnt
+        FROM BOARD
+        <where>
+            <if test="keyword != null and keyword != ''">
+                <if test="searchType=='title'">
+                    AND title like CONCAT('%',#{keyword},'%')
+                </if>
+                <if test="searchType=='content'">
+                    AND content like CONCAT('%',#{keyword},'%')
+                </if>
+                <if test="searchType=='memId'">
+                    AND memId like CONCAT('%',#{keyword},'%')
+                </if>
+            </if>
+        </where>
+    </select>
+    
+    
+    <!-- 게시글 작성 -->
+    <insert id="insertTest" parameterType="egovframework.example.board.vo.BoardVo">
+    	<selectKey resultType="int" order="BEFORE" keyProperty="boardNo">
+			SELECT AUTONUM.NEXTVAL FROM DUAL
+		</selectKey>
+    
+		INSERT INTO BOARD (
+						boardNo
+					    ,title
+					    ,content
+					    ,memId
+					    ,regDate
+					    
+					) VALUES (
+						#{boardNo}
+					    ,#{title}
+					    ,#{content}
+					    ,#{memId}
+					    ,SYSDATE
+					   
+					)
+    </insert>
+
+    
+	<!--게시글 상세보기 -->
+	    <select id="selectDetail" parameterType="Integer" resultType="egovframework.example.board.vo.BoardVo">
+	        SELECT * FROM BOARD
+	        WHERE boardNo = #{boardNo}
+	    </select>    
+	    
+	    
+	<!-- 게시글 수정 -->
+	    <update id="updateTest" parameterType="egovframework.example.board.vo.BoardVo">
+		   	 UPDATE BOARD
+				SET
+					title = #{title}
+					,content = #{content}
+			    
+				WHERE
+					boardNo = #{boardNo}
+	    </update>    
+	    
+	<!-- 게시글 삭제 -->
+	    <delete id="deleteTest" parameterType="Integer">
+	        DELETE FROM BOARD
+	        WHERE boardNo = #{boardNo}
+	    </delete>
+	
+	<!-- /////////////////////////////// 댓글 ///////////////////////////////////// -->
+	<!-- 댓글 목록 -->	 
+	<select id="listCmnt" parameterType="int" resultType="egovframework.example.board.vo.CmntVo" >
+		SELECT
+		    cmntNo,
+		    cmntContent,
+		    cmntDate,
+		    memId,
+		    boardNo
+		FROM
+	    	CMNT
+	    WHERE boardNo = #{boardNo}
+	</select>
+
+	<!-- 댓글 작성 -->
+	<insert id="insertCmnt" parameterType="egovframework.example.board.vo.CmntVo">
+	
+		<selectKey resultType="int" order="BEFORE" keyProperty="cmntNo">
+			SELECT CMNTSEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		
+		INSERT INTO CMNT (
+	   		cmntNo,
+	    	cmntContent,
+	    	cmntDate,
+	    	memId,
+	    	boardNo
+		) VALUES (
+	    	#{cmntNo},
+	    	#{cmntContent},
+	    	SYSDATE,
+	    	#{memId},
+	    	#{boardNo}
+		)
+	</insert>
+
+	<!-- 첨부파일 -->
+	<insert id="insertFile" parameterType="egovframework.example.board.vo.FileVo">
+		<selectKey resultType="int" order="BEFORE" keyProperty="fileNo">
+			SELECT FILESEQ.NEXTVAL FROM DUAL
+		</selectKey>			
+		
+		INSERT INTO BOARDFILE (
+	   		fileNo,
+	    	fileName,
+	    	filePath,
+	    	boardNo
+		) VALUES (
+	    	#{fileNo},
+	    	#{fileName},
+	    	#{filePath},
+	    	#{boardNo}
+		)
+	
+	</insert>
+	
+	    
+
+
+ 
+</mapper>
+
+
+
+
+
+
+
+

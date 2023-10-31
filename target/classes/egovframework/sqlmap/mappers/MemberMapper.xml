@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.example.member.service.MemberMapper">
+
+	<select id="loginCheck" resultType="String">
+		SELECT memNm 
+		FROM MEMBER
+		WHERE memId = #{memId} AND memPw = #{memPw}
+	</select>
+	
+	<select id="viewMember" resultType="egovframework.example.member.vo.MemberVo">
+		SELECT 
+			memNo,
+			memId,
+			memPw,
+			memNm
+		FROM MEMBER
+		WHERE memId = #{memId} AND memPw = #{memPw}
+	
+	</select>
+	
+	<insert id="register">
+		<selectKey resultType="int" order="BEFORE" keyProperty="memNo">
+			SELECT MEMSEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		
+		INSERT INTO MEMBER (
+		    memNo,
+		    memId,
+		    memPw,
+		    memNm
+		) VALUES (
+		    #{memNo},
+		    #{memId},
+		    #{memPw},
+		    #{memNm}
+		)
+	</insert>
+	
+	
+	<select id="idCheck" parameterType="String" resultType="int">
+		SELECT 
+			count(memId) 
+		FROM MEMBER 
+		WHERE mem_id = #{memId}
+	</select>
+
+
+
+</mapper>
